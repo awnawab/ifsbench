@@ -314,55 +314,57 @@ class Atos(Arch):
                 gpus_per_node = min(gpus_per_task * tasks_per_node, cls.cpu_config.gpus_per_node)
 
         if gpus_per_node:
-            launch_user_options.insert(0, '--qos=ng')
+            #launch_user_options.insert(0, '--qos=ng')
 
             # To ensure we correctly bind GPUs to CPUs we write a little
             # wrapper script that maps the correct CUDA_VISIBLE_DEVICES
             # id to each rank locally per node.
             # Because the mapping from NUMA domain to GPU is
             # [1->0, 0->1, 3->2, 2->3], we need to apply some reordering here
+            pass
 
-            # The GPU that is closest to each core
-            core_to_gpu_mapping = {core: 1 for core in range(32)}
-            core_to_gpu_mapping.update({core: 0 for core in range(32, 64)})
-            core_to_gpu_mapping.update({core: 3 for core in range(64, 96)})
-            core_to_gpu_mapping.update({core: 2 for core in range(96, 128)})
-
-            # Determine the cores that each task is using on a node
-            physical_cpus_per_task = (cpus_per_task - 1) // threads_per_core + 1
-            physical_cores_per_task = {
-                local_rank: [physical_cpus_per_task * local_rank + i for i in range(physical_cpus_per_task)]
-                for local_rank in range(tasks_per_node)
-            }
-
-            # The GPUs to be used by each rank
-            task_gpu_strings = [
-                ','.join(dict.fromkeys(
-                    str(core_to_gpu_mapping[core])
-                    for core in physical_cores_per_task[local_rank]
-                ))
-                for local_rank in range(tasks_per_node)
-            ]
-            wrapper_str = f"""
-#!/bin/bash
-VISIBLE_DEVICES_PER_RANK=({' '.join(task_gpu_strings)})
-export CUDA_VISIBLE_DEVICES=${{VISIBLE_DEVICES_PER_RANK[${{SLURM_LOCALID}}]}}
-exec $*
-            """.strip()
+#            # The GPU that is closest to each core
+#            core_to_gpu_mapping = {core: 1 for core in range(32)}
+#            core_to_gpu_mapping.update({core: 0 for core in range(32, 64)})
+#            core_to_gpu_mapping.update({core: 3 for core in range(64, 96)})
+#            core_to_gpu_mapping.update({core: 2 for core in range(96, 128)})
+#
+#            # Determine the cores that each task is using on a node
+#            physical_cpus_per_task = (cpus_per_task - 1) // threads_per_core + 1
+#            physical_cores_per_task = {
+#                local_rank: [physical_cpus_per_task * local_rank + i for i in range(physical_cpus_per_task)]
+#                for local_rank in range(tasks_per_node)
+#            }
+#
+#            # The GPUs to be used by each rank
+#            task_gpu_strings = [
+#                ','.join(dict.fromkeys(
+#                    str(core_to_gpu_mapping[core])
+#                    for core in physical_cores_per_task[local_rank]
+#                ))
+#                for local_rank in range(tasks_per_node)
+#            ]
+#            wrapper_str = f"""
+##!/bin/bash
+#VISIBLE_DEVICES_PER_RANK=({' '.join(task_gpu_strings)})
+#export CUDA_VISIBLE_DEVICES=${{VISIBLE_DEVICES_PER_RANK[${{SLURM_LOCALID}}]}}
+#exec $*
+#            """.strip()
 
             rundir = kwargs.get('cwd')
             if not rundir:
                 raise RuntimeError('No rundir given to Atos.run')
-            wrapper = Path(rundir/'select_gpu.sh')
-            wrapper.write_text(wrapper_str, encoding='utf_8')
-            wrapper.chmod(0o750)
+            #wrapper = Path(rundir/'select_gpu.sh')
+            #wrapper.write_text(wrapper_str, encoding='utf_8')
+            #wrapper.chmod(0o750)
 
-            cmd = [str(wrapper), *cmd]
+            #cmd = [str(wrapper), *cmd]
         elif tasks * cpus_per_task > 32:
             # By default, stuff on Atos runs on the GPIL nodes which allow only
             # up to 32 cores. If more resources are needed, the compute
             # partition should be requested.
-            launch_user_options.insert(0, '--qos=np')
+            pass
+            #launch_user_options.insert(0, '--qos=np')
 
 
         # Bind to cores
