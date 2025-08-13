@@ -65,6 +65,11 @@ function(python_venv VENV_NAME )
         OUTPUT_VARIABLE Python3_VENV_BIN
     )
 
+    # install setuptools
+	execute_process(
+		COMMAND ${Python_VENV_BIN} -m pip install setuptools
+	)
+
     # Forward variables to parent scope
     foreach ( _VAR_NAME Python3_FOUND Python3_EXECUTABLE Python3_VENV_BIN )
         set( ${_VAR_NAME} ${${_VAR_NAME}} PARENT_SCOPE )
