@@ -416,6 +416,22 @@ class AtosAc(Atos):
 
     launcher = SrunLauncher
 
+class AtosAg(Atos):
+    """
+    Architecture for the Atos ac partition that also offers NVIDIA A100 GPUs.
+    """
+
+    class AtosAgCpuConfig(CpuConfiguration):
+
+        sockets_per_node = 4
+        cores_per_socket = 72
+        threads_per_core = 1
+        gpus_per_node = 4
+
+    cpu_config = AtosAgCpuConfig
+
+    launcher = SrunLauncher
+
 class Lumi(Arch):
     # Define the default partition
     partition : str
@@ -527,6 +543,7 @@ arch_registry = {
     'xc40intel': XC40Intel,
     'atos_aa': AtosAaIntel,
     'atos_ac': AtosAc,
+    'atos_ag': AtosAg,
     'lumi_c': LumiC,
     'lumi_g': LumiG
 }
